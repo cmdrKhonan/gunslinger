@@ -1,10 +1,20 @@
 import cv2
+import pygame
 
 import numpy as np
 
+
+
+pygame.init()
+audioFile = ('bullet_01.mp3')
+pygame.mixer.music.load(audioFile)
+
+red = np.uint8([[[0,0,200 ]]])
+hsv_red = cv2.cvtColor(red,cv2.COLOR_BGR2HSV)
+print( hsv_red )
+
 # Initialize webcam
 cap = cv2.VideoCapture(0)
-
 while True:
     # Capture frame-by-frame
     ret, frame = cap.read()
@@ -13,15 +23,19 @@ while True:
     hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
 
     # Define range of red color in HSV
-    lower_red = np.array([0, 50, 50])
+    lower_red = np.array([0, 25, 25])
     upper_red = np.array([10, 255, 255])
 
     # Threshold the HSV image to get only red colors
     mask = cv2.inRange(hsv, lower_red, upper_red)
 
+    res = cv2.bitwise_and(frame,frame, mask= mask)
+
     # Find contours in the masked image
     contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-
+    cv2.imshow('frame',frame)
+    cv2.imshow('mask',mask)
+    cv2.imshow('res',res)
 
     # Iterate through contours
     for contour in contours:
@@ -33,6 +47,8 @@ while True:
             # Display centroid
             cv2.circle(frame, (cX, cY), 5, (0, 255, 0), -1)
             cv2.putText(frame, f"({cX}, {cY})", (cX - 20, cY - 20), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
+            #pygame.mixer.music.play(1)
+            break;
 
     # Display the resulting frame
     cv2.imshow('Frame', hsv)
